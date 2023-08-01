@@ -1,0 +1,43 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  header {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  h1 {
+    margin: 0;
+  }
+  
+  form {
+    margin-top: 1rem;
+  }
+  
+  #search-form input[type="text"] {
+    padding: 0.5rem;
+  }
+  
+  #search-form button {
+    padding: 0.5rem 1rem;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  #search-form button:hover {
+    background-color: #45a049;
+  }
+  
+  #current-weather, #forecast, #search-history {
+    margin: 1rem;
+  }
+  
+  /* Add more CSS styles as needed for formatting the weather data */
+  
