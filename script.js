@@ -1,6 +1,6 @@
 // Function to fetch current weather data for a city
 var apiKey = "6fbdc0a863fd5db347336fe3c13fa708"; 
-var city = "Jacksonville"
+// var city = "Jacksonville" addEventListener
 function getCurrentWeatherData() {
   var apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
   var APIKey = "6fbdc0a863fd5db347336fe3c13fa708";
@@ -41,9 +41,6 @@ function fetchFiveDayForecast(city) {
       return response.json();
     })
     .then((data) => data.list)
-    .catch((error) => {
-      throw error;
-    });
 }
 
 // Function to display current weather data on the dashboard
