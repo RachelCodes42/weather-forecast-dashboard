@@ -18,6 +18,8 @@ Search History: Every time you search for a city, it is added to the search hist
 Clone the repository to your local machine.
 Open the index.html file in your web browser.
 
+Deployment Link: https://rachelcodes42.github.io/weather-forecast-dashboard/ 
+
 ## Usage
 
 Open the Weather Dashboard in your web browser.
