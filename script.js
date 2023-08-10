@@ -1,87 +1,148 @@
-// Function to fetch current weather data for a city
-var apiKey = "6fbdc0a863fd5db347336fe3c13fa708"; 
-// var city = "Jacksonville" addEventListener
-function getCurrentWeatherData() {
-  var apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
-  var APIKey = "6fbdc0a863fd5db347336fe3c13fa708";
+var cityNameInput = document.getElementById("inputCityName")
+var cityButtonContainer = document.getElementById("cityButtons")
+var searchButton = document.getElementById('searchButton')
+var fiveDayForecastContainer = document.getElementById('5dayForecastContainer')
+var submitButton = document.getElementById('submitButton')
 
-  // Use Fetch API to fetch current weather data
-  fetch(apiUrl)
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      console.log(data);
-      console.log(data.main.temp); 
+//current weather specific variables
+var cwCity = document.getElementById('cwName')
+var cwDate = document.getElementById('cwDate')
+var cwTemp = document.getElementById('cwTemp')
+var cwWind = document.getElementById('cwWind')
+var cwHumidity = document.getElementById('cwHumidity')
 
-      // Process the current weather data and display it on the dashboard
-      // displayCurrentWeatherData(data);
-      // Fetch 5-day forecast data for the city
-      // return fetchFiveDayForecast(city);
-    })
-  // .then((forecastData) => {
-  //   // Process the 5-day forecast data and display it on the dashboard
-  //   displayForecastData(forecastData);
-  // })
-  // .catch((error) => {
-  //   alert(error.message);
-  // });
-}
-getCurrentWeatherData()
-// Function to fetch 5-day forecast data for a city
-function fetchFiveDayForecast(city) {
-  var apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
+//localStorage variables
+var localStorageContent = localStorage.getItem('cities')
+var cityObjArray = JSON.parse(localStorageContent) || []
 
-  // Use Fetch API to fetch 5-day forecast data
-  return fetch(apiUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("City not found.");
-      }
-      return response.json();
-    })
-    .then((data) => data.list)
-}
+//I want to generate any buttons in localStorage on page load
+buttonGenerator();
 
-// Function to display current weather data on the dashboard
-function displayCurrentWeatherData(data) {
-  // Update the DOM elements to display current weather data
-  // You can use jQuery or native DOM manipulation to create and update HTML elements as needed
-}
+//event listener for users who press enter, getting the input field value and calling my functions
+cityNameInput.addEventListener("keydown", (event) => {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    cityNameInput = event.target.value;
+    getLocation(cityNameInput);
+    document.getElementById('inputCityName').value = ''
+  }
+})
 
-// Function to display 5-day forecast data on the dashboard
-function displayForecastData(data) {
-  // Update the DOM elements to display 5-day forecast data
-  // You can use jQuery or native DOM manipulation to create and update HTML elements as needed
-}
-
-// Function to handle form submission
-$("#search-form").submit(function (event) {
+//event listener for users who press the submit button
+submitButton.addEventListener("click", (event) => {
+  if (document.getElementById("inputCityName").value === '') return;
   event.preventDefault();
-  var city = $("#city-input").val().trim();
+  cityNameInput = document.getElementById("inputCityName").value
+  console.log(cityNameInput)
+  getLocation(cityNameInput)
+})
 
-  // Call the function to get current weather data for the entered city
-  getCurrentWeatherData(city);
+//event listener for previous city buttons to display their weather data
+cityButtonContainer.addEventListener("click", (event) => {
+  if (event.target.value !== undefined) {
+    var buttonClicked = event.target.textContent
+    getLocation(buttonClicked)
+  }
+})
 
-  // Clear the input field after search
-  $("#city-input").val("");
-});
+//function for getting the lat, lon values for a city name and storing those values
+function getLocation(cityNameInput) {
+  var apiKey = '6fbdc0a863fd5db347336fe3c13fa708'
+  var geoCodingCall = `https://api.openweathermap.org/geo/1.0/direct?q=${cityNameInput}&limit=1&appid=${apiKey}`
 
-// Function to handle click on search history
-$("#search-history").on("click", ".history-item", function () {
-  var city = $(this).text();
+  fetch(geoCodingCall)
+    .then(response => response.json())
+    .then((data) => {
+      if (data[0] === undefined) {
+        alert('no cities found')
+        buttonGenerator()
+        return;
+      } else {
+        var lat = data[0].lat
+        var lon = data[0].lon
+        var cityName = data[0].name
 
-  // Call the function to get current weather data for the clicked city
-  getCurrentWeatherData(city);
-});
+        cityStorage(cityName)
+        displayData(lat, lon)
+      }
+    })
+}
 
+//function for getting the weather data of a city using lat and lon
+function displayData(lat, lon) {
+  var apiKey = 'f1b45b757f5516eb0176dce94ee00898'
+  var futureWeatherCall = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`
+  var currentWeatherCall = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`
 
+  //fetch request for the current weather
+  fetch(currentWeatherCall)
+    .then(response => response.json())
+    .then((data) => {
+      cwCity.innerHTML = `<strong>${data.name}</strong><img src="http://openweathermap.org/img/w/${data.weather[0].icon}.png">`
+      cwDate.innerHTML = `<strong>${dateGenerator(data.dt)}</strong>`
+      cwTemp.textContent = `Temperature: ${Math.round(data.main.temp)}° F` //round to nearest whole integer
+      cwWind.textContent = `Wind: ${data.wind.speed} MPH`
+      cwHumidity.textContent = `Humidity: ${data.main.humidity}%`
+    })
 
+  //fetch request for the 5 day forecast
+  fetch(futureWeatherCall)
+    .then(response => response.json())
+    .then((data) => {
+      fiveDayForecastContainer.innerHTML = ''
 
+      //for loop to iterate through the array and create an element for each day. the data is in 3 hour increments over 5 days, so 40 objects total. I'll take the weather at noon for each day.
+      for (i = 4; i < 40; i += 8) {
+        var date = data.list[i].dt;
+        date = dateGenerator(date); //get a formatted date
+        date = date.slice(0, 6) //remove the year from the date
+        var icon = data.list[i].weather[0].icon;
+        var temp = `${Math.round(data.list[i].main.feels_like)}° F`;
+        var wind = data.list[i].wind.speed;
+        var humidity = data.list[i].main.humidity;
 
+        fiveDayForecastContainer.innerHTML += `
+        <div class="col-lg-2 col-12 border border-3 border-secondary shadow rounded p-2 my-3" id="weatherCards">
+            <p class="h3 text-center">${date}</p>
+            <img src='http://openweathermap.org/img/wn/${icon}@2x.png' class="mx-auto d-block" alt='image of weather'></img>
+            <p>Temp: ${temp}</p>
+            <p>Wind: ${wind} MPH</p>
+            <p>Humidity: ${humidity}%</p>
+        </div>
+        `}
+    })
+}
 
+//function for the localStorage of city names and lat/lon as well as generating the buttons
+function cityStorage(cityName) {
+  var addCityObject = {
+    name: cityName
+  }
 
+  cityObjArray.push(addCityObject)
 
-  // if (!response.ok) {
-      //   throw new Error("City not found.");
-      // }
+  if (cityObjArray.length > 5) {
+    cityObjArray.shift()
+  }
+
+  buttonGenerator()
+
+  localStorage.setItem('cities', JSON.stringify(cityObjArray))
+}
+
+//function for generating the buttons
+function buttonGenerator() {
+  cityButtonContainer.innerHTML = '' //need to clear the buttons on page load
+  for (var i = cityObjArray.length - 1; i >= 0; i--) { //I want the buttons to appear with the most recent addition on top, so using reverse loop
+    cityButtonContainer.innerHTML += `
+        <button type="button" class="btn btn-secondary form-control py-2 my-2">${cityObjArray[i].name}</button>
+        `
+  }
+}
+
+//function to turn milliseconds into a readable date. 
+//Part of this code was taken from https://www.geeksforgeeks.org/how-to-convert-milliseconds-to-date-in-javascript/
+function dateGenerator(time) {
+  var date = new Date(time * 1000); //code taken from Geeks for Geeks
+  return date.toString().slice(4, 15)
+}
