@@ -26,10 +26,11 @@ Click the "Search" button to retrieve the weather data.
 The current weather conditions and the 5-day forecast for the city will be displayed on the dashboard.
 If you want to check the weather for a city in your search history, simply click on that city in the search history list.
 
-To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative filepath, add it to your README using the following syntax:
+
+
 
 ![alt text](images/sc.png)
-  
+
 
 ## Credits
 
